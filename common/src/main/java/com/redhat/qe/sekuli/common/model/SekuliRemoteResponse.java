@@ -3,6 +3,7 @@ package com.redhat.qe.sekuli.common.model;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * @author Jeeva Kandasamy (jkandasa)
@@ -10,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class SekuliRemoteResponse {
     private RESULT result;
     private String error;
-    private Throwable throwable;
+    private String throwable;
     private Long timeTaken;
     private Object response;
 
@@ -37,11 +38,15 @@ public class SekuliRemoteResponse {
         this.error = error;
     }
 
-    public Throwable getThrowable() {
+    public String getThrowable() {
         return throwable;
     }
 
     public void setThrowable(Throwable throwable) {
+        this.throwable = ExceptionUtils.getStackTrace(throwable);
+    }
+
+    public void setThrowable(String throwable) {
         this.throwable = throwable;
     }
 

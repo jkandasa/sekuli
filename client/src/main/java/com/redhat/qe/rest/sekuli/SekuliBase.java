@@ -14,10 +14,13 @@ import com.redhat.qe.rest.sekuli.model.SekuliResponseModel;
 import com.redhat.qe.sekuli.common.SekuliCommonUtils;
 import com.redhat.qe.sekuli.common.model.FileBase64;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author Jeeva Kandasamy (jkandasa)
  */
 
+@Slf4j
 public class SekuliBase extends RestHttpClient {
 
     protected String hostname;
@@ -66,9 +69,28 @@ public class SekuliBase extends RestHttpClient {
                 .build();
     }
 
+    protected RestHttpResponse doPostAndCheck(SekuliCommandModel cmd) {
+        RestHttpResponse response = doPost(root(), header, SekuliCommonUtils.toJson(cmd), null);
+        if (!response.getResponseCode().equals(STATUS_CODE.OK.getCode())) {
+            try {
+                @SuppressWarnings("unchecked")
+                SekuliResponseModel<Object> cmdResponse = (SekuliResponseModel<Object>) readValue(
+                        response.getEntity(), simpleResolver().get(SekuliResponseModel.class, Object.class));
+                _logger.error("{}", cmdResponse.toString());
+                throw new RuntimeException(cmdResponse.toString());
+            } catch (Exception ex) {
+                throw new RuntimeException("Did not match with expected response code[" + STATUS_CODE.OK.getCode()
+                        + "], " + response.toString());
+            }
+        } else {
+            return response;
+        }
+
+    }
+
     @SuppressWarnings("unchecked")
     public Object doPostReturnCustom(SekuliCommandModel cmd, Class<?> parametrizedClazz) {
-        RestHttpResponse response = doPost(root(), header, SekuliCommonUtils.toJson(cmd), STATUS_CODE.OK.getCode());
+        RestHttpResponse response = doPostAndCheck(cmd);
         SekuliResponseModel<FileBase64> cmdResponse = (SekuliResponseModel<FileBase64>) readValue(
                 response.getEntity(), simpleResolver().get(SekuliResponseModel.class, parametrizedClazz));
         return cmdResponse.getEntity();
@@ -76,7 +98,7 @@ public class SekuliBase extends RestHttpClient {
 
     @SuppressWarnings("unchecked")
     public Object doPostReturnCollection(SekuliCommandModel cmd, Class<?> parametrizedClazz) {
-        RestHttpResponse response = doPost(root(), header, SekuliCommonUtils.toJson(cmd), STATUS_CODE.OK.getCode());
+        RestHttpResponse response = doPostAndCheck(cmd);
         SekuliResponseModel<Object> cmdResponse = (SekuliResponseModel<Object>) readValue(
                 response.getEntity(), simpleResolver().get(SekuliResponseModel.class, List.class, parametrizedClazz));
         return cmdResponse.getEntity();
@@ -84,7 +106,7 @@ public class SekuliBase extends RestHttpClient {
 
     @SuppressWarnings("unchecked")
     protected Object doPostReturnObject(SekuliCommandModel cmd, String key, Class<?> parametrizedClazz) {
-        RestHttpResponse response = doPost(root(), header, SekuliCommonUtils.toJson(cmd), STATUS_CODE.OK.getCode());
+        RestHttpResponse response = doPostAndCheck(cmd);
         SekuliResponseModel<Map<String, Object>> cmdResponse = (SekuliResponseModel<Map<String, Object>>) readValue(
                 response.getEntity(),
                 simpleResolver().get(SekuliResponseModel.class, Map.class, String.class, parametrizedClazz));
@@ -100,7 +122,7 @@ public class SekuliBase extends RestHttpClient {
     }
 
     protected void doPostReturnVoid(SekuliCommandModel cmd) {
-        doPost(root(), header, SekuliCommonUtils.toJson(cmd), STATUS_CODE.OK.getCode());
+        doPostAndCheck(cmd);
     }
 
 }

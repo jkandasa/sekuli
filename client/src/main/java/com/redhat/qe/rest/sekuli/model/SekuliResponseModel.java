@@ -17,7 +17,7 @@ import lombok.ToString;
 public class SekuliResponseModel<T> {
     private RESULT result;
     private String error;
-    private Throwable throwable;
+    private String throwable;
     private Long timeTaken;
 
     @JsonProperty("response")

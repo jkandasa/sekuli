@@ -94,8 +94,8 @@ public class RemoteScreen extends DesktopScreenRegion {
             mouse.click(region);
         } else {
             throw new TargetImageNotAvailableException(MessageFormat.format(
-                    "TargetImage[name:{0}, similarity:{}] not available on the screen!",
-                    targetName, get(targetName).getMinScore()));
+                    "TargetImage{name:{0}, similarity:{1}} not available on the screen!",
+                    targetName, String.valueOf(get(targetName).getMinScore())));
         }
     }
 
