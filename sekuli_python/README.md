@@ -3,7 +3,6 @@
 This library helps to access Sikuli remotely(via selenium grid or node).
 
 ## Usage
-----
 * Setup virtual environment and installed requirements
 ```
 $ virtualenv .env
